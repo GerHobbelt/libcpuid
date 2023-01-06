@@ -31,6 +31,8 @@
 #include "libcpuid_util.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#else
+#define VERSION "0.6.6"
 #endif
 #include <stdio.h>
 #include <string.h>

@@ -51,11 +51,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+
 #include "libcpuid.h"
 
 /* Globals: */
-char raw_data_file[256] = "";
-char out_file[256] = "";
+static char raw_data_file[256] = "";
+static char out_file[256] = "";
 typedef enum {
 	NEED_CPUID_PRESENT,
 	NEED_ARCHITECTURE,
@@ -103,6 +105,7 @@ typedef enum {
 	NEED_SSE_UNIT_SIZE,
 } output_data_switch;
 
+static
 int need_input = 0,
     need_output = 0,
     need_quiet = 0,
@@ -117,13 +120,13 @@ int need_input = 0,
     need_identify = 0;
 
 #define MAX_REQUESTS 32
-int num_requests = 0;
-output_data_switch requests[MAX_REQUESTS];
+static int num_requests = 0;
+static output_data_switch requests[MAX_REQUESTS];
 
-FILE *fout;
+static FILE *fout;
 
 
-const struct { output_data_switch sw; const char* synopsis; int ident_required; }
+static const struct { output_data_switch sw; const char* synopsis; int ident_required; }
 matchtable[] = {
 	{ NEED_CPUID_PRESENT, "--cpuid"        , 0},
 	{ NEED_ARCHITECTURE , "--architecture" , 1},
@@ -172,7 +175,7 @@ matchtable[] = {
 	{ NEED_SSE_UNIT_SIZE, "--sse-size"     , 1},
 };
 
-const int sz_match = (sizeof(matchtable) / sizeof(matchtable[0]));
+static const int sz_match = (sizeof(matchtable) / sizeof(matchtable[0]));
 
 /* functions */
 
@@ -615,7 +618,11 @@ static void print_hypervisor(struct cpu_raw_data_t* raw, struct cpu_id_t* data)
 		              "Refer to https://github.com/anrieff/libcpuid/issues/90#issuecomment-296568713\n");
 }
 
-int main(int argc, char** argv)
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      cpuid_tool_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv)
 {
 	int parseres = parse_cmdline(argc, argv);
 	int i, readres, writeres;

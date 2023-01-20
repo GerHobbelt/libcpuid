@@ -7,15 +7,15 @@
 #include <string>
 using namespace std;
 
-const char* drivers_root = "..\\contrib\\MSR Driver\\";
-const char* sourcefile = "msrdriver.c";
+static const char* drivers_root = "..\\contrib\\MSR Driver\\";
+static const char* sourcefile = "msrdriver.c";
 
-char* images[2];
-int sizes[2];
-const char* filenames[] = { "TmpRdr.sys", "TmpRdr64.sys" };
-vector<string> source;
+static char* images[2];
+static int sizes[2];
+static const char* filenames[] = { "TmpRdr.sys", "TmpRdr64.sys" };
+static vector<string> source;
 
-bool read_image(const char* filename, char*& image, int& isize)
+static bool read_image(const char* filename, char*& image, int& isize)
 {
 	char fn[512];
 	sprintf(fn, "%s%s", drivers_root, filename);
@@ -31,7 +31,7 @@ bool read_image(const char* filename, char*& image, int& isize)
 	return true;
 }
 
-bool read_source(const char* filename)
+static bool read_source(const char* filename)
 {
 	source.clear();
 	FILE* f = fopen(filename, "rt");
@@ -46,7 +46,7 @@ bool read_source(const char* filename)
 	return true;
 }
 
-void print_image(FILE* f, const char* arch, const char* image, int size)
+static void print_image(FILE* f, const char* arch, const char* image, int size)
 {
 	fprintf(f, "int cc_%sdriver_code_size = %d;\n", arch, size);
 	fprintf(f, "uint8_t cc_%sdriver_code[%d] = {", arch, size);
@@ -56,6 +56,11 @@ void print_image(FILE* f, const char* arch, const char* image, int size)
 	}
 	fprintf(f, "\n};\n");
 }
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main      cpuid_embed_drivers_main
+#endif
 
 int main(void)
 {

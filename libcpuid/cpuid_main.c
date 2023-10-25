@@ -25,8 +25,9 @@
  */
 #include "libcpuid.h"
 #include "libcpuid_internal.h"
-#include "recog_intel.h"
 #include "recog_amd.h"
+#include "recog_centaur.h"
+#include "recog_intel.h"
 #include "asm-bits.h"
 #include "libcpuid_util.h"
 #ifdef HAVE_CONFIG_H
@@ -1140,6 +1141,9 @@ int cpu_ident_internal(struct cpu_raw_data_t* raw, struct cpu_id_t* data, struct
 		case VENDOR_HYGON:
 			r = cpuid_identify_amd(raw, data, internal);
 			break;
+		case VENDOR_CENTAUR:
+			r = cpuid_identify_centaur(raw, data, internal);
+			break;
 		default:
 			break;
 	}
@@ -1354,9 +1358,9 @@ int cpu_identify_all(struct cpu_raw_data_array_t* raw_array, struct system_id_t*
 				}
 				else {
 					/* Note: if SMT is disabled by BIOS, smt_divisor will no reflect the current state properly */
-					is_smt_supported = (system->cpu_types[cpu_type_index].num_logical_cpus % system->cpu_types[cpu_type_index].num_cores) == 0;
+					is_smt_supported = system->cpu_types[cpu_type_index].num_cores > 0 ? (system->cpu_types[cpu_type_index].num_logical_cpus % system->cpu_types[cpu_type_index].num_cores) == 0 : false;
 					smt_divisor      = is_smt_supported ? system->cpu_types[cpu_type_index].num_logical_cpus / system->cpu_types[cpu_type_index].num_cores : 1.0;
-					system->cpu_types[cpu_type_index].num_cores = (int32_t) num_logical_cpus / smt_divisor;
+					system->cpu_types[cpu_type_index].num_cores = (int32_t) (num_logical_cpus / smt_divisor);
 				}
 				/* Save current values in system->cpu_types[cpu_type_index] and reset values for the next purpose */
 				system->cpu_types[cpu_type_index].num_logical_cpus = num_logical_cpus;
@@ -1686,7 +1690,7 @@ void cpuid_get_cpu_list(cpu_vendor_t vendor, struct cpu_list_t* list)
 			make_list_from_string("UMC x86 CPU", list);
 			break;
 		case VENDOR_CENTAUR:
-			make_list_from_string("VIA C3,VIA C7,VIA Nano", list);
+			cpuid_get_list_centaur(list);
 			break;
 		case VENDOR_RISE:
 			make_list_from_string("Rise mP6", list);

@@ -72,30 +72,30 @@ struct msr_driver_t* cpu_msr_driver_open_core(unsigned core_num)
 	char msr[MSR_PATH_LEN];
 	struct msr_driver_t* handle;
 	if (core_num >= cpuid_get_total_cpus()) {
-		set_error(ERR_INVCNB);
+		cpuid_set_error(ERR_INVCNB);
 		return NULL;
 	}
 	if (!rdmsr_supported()) {
-		set_error(ERR_NO_RDMSR);
+		cpuid_set_error(ERR_NO_RDMSR);
 		return NULL;
 	}
 	snprintf(msr, MSR_PATH_LEN, "/dev/cpu/%u/msr", core_num);
 	if(!load_driver(msr)) {
-		set_error(ERR_NO_DRIVER);
+		cpuid_set_error(ERR_NO_DRIVER);
 		return NULL;
 	}
 	int fd = open(msr, O_RDONLY);
 	if (fd < 0) {
 		if (errno == EIO) {
-			set_error(ERR_NO_RDMSR);
+			cpuid_set_error(ERR_NO_RDMSR);
 			return NULL;
 		}
-		set_error(ERR_NO_DRIVER);
+		cpuid_set_error(ERR_NO_DRIVER);
 		return NULL;
 	}
 	handle = (struct msr_driver_t*) malloc(sizeof(struct msr_driver_t));
 	if (!handle) {
-		set_error(ERR_NO_MEM);
+		cpuid_set_error(ERR_NO_MEM);
 		return NULL;
 	}
 	handle->fd = fd;
@@ -107,10 +107,10 @@ int cpu_rdmsr(struct msr_driver_t* driver, uint32_t msr_index, uint64_t* result)
 	ssize_t ret;
 
 	if (!driver || driver->fd < 0)
-		return set_error(ERR_HANDLE);
+		return cpuid_set_error(ERR_HANDLE);
 	ret = pread(driver->fd, result, 8, msr_index);
 	if (ret != 8)
-		return set_error(ERR_INVMSR);
+		return cpuid_set_error(ERR_INVMSR);
 	return 0;
 }
 
@@ -160,30 +160,30 @@ struct msr_driver_t* cpu_msr_driver_open_core(unsigned core_num)
 	char msr[MSR_PATH_LEN];
 	struct msr_driver_t* handle;
 	if (core_num >= cpuid_get_total_cpus()) {
-		set_error(ERR_INVCNB);
+		cpuid_set_error(ERR_INVCNB);
 		return NULL;
 	}
 	if (!rdmsr_supported()) {
-		set_error(ERR_NO_RDMSR);
+		cpuid_set_error(ERR_NO_RDMSR);
 		return NULL;
 	}
 	snprintf(msr, MSR_PATH_LEN, "/dev/cpuctl%u", core_num);
 	if(!load_driver(msr)) {
-		set_error(ERR_NO_DRIVER);
+		cpuid_set_error(ERR_NO_DRIVER);
 		return NULL;
 	}
 	int fd = open(msr, O_RDONLY);
 	if (fd < 0) {
 		if (errno == EIO) {
-			set_error(ERR_NO_RDMSR);
+			cpuid_set_error(ERR_NO_RDMSR);
 			return NULL;
 		}
-		set_error(ERR_NO_DRIVER);
+		cpuid_set_error(ERR_NO_DRIVER);
 		return NULL;
 	}
 	handle = (struct msr_driver_t*) malloc(sizeof(struct msr_driver_t));
 	if (!handle) {
-		set_error(ERR_NO_MEM);
+		cpuid_set_error(ERR_NO_MEM);
 		return NULL;
 	}
 	handle->fd = fd;
@@ -196,10 +196,10 @@ int cpu_rdmsr(struct msr_driver_t* driver, uint32_t msr_index, uint64_t* result)
 	args.msr = msr_index;
 
 	if (!driver || driver->fd < 0)
-		return set_error(ERR_HANDLE);
+		return cpuid_set_error(ERR_HANDLE);
 
 	if(ioctl(driver->fd, CPUCTL_RDMSR, &args))
-		return set_error(ERR_INVMSR);
+		return cpuid_set_error(ERR_INVMSR);
 
 	*result = args.data;
 	return 0;
@@ -244,20 +244,20 @@ struct msr_driver_t* cpu_msr_driver_open(void)
 	struct msr_driver_t* drv;
 	int status;
 	if (!rdmsr_supported()) {
-		set_error(ERR_NO_RDMSR);
+		cpuid_set_error(ERR_NO_RDMSR);
 		return NULL;
 	}
 
 	drv = (struct msr_driver_t*) malloc(sizeof(struct msr_driver_t));
 	if (!drv) {
-		set_error(ERR_NO_MEM);
+		cpuid_set_error(ERR_NO_MEM);
 		return NULL;
 	}
 	memset(drv, 0, sizeof(struct msr_driver_t));
 
 	if (!extract_driver(drv)) {
 		free(drv);
-		set_error(ERR_EXTRACT);
+		cpuid_set_error(ERR_EXTRACT);
 		return NULL;
 	}
 
@@ -265,7 +265,7 @@ struct msr_driver_t* cpu_msr_driver_open(void)
 	if (!DeleteFile(drv->driver_path))
 		debugf(1, "Deleting temporary driver file failed.\n");
 	if (!status) {
-		set_error(drv->errorcode ? drv->errorcode : ERR_NO_DRIVER);
+		cpuid_set_error(drv->errorcode ? drv->errorcode : ERR_NO_DRIVER);
 		free(drv);
 		return NULL;
 	}
@@ -446,7 +446,7 @@ int cpu_rdmsr(struct msr_driver_t* driver, uint32_t msr_index, uint64_t* result)
 	SERVICE_STATUS srvStatus = {0};
 
 	if (!driver)
-		return set_error(ERR_HANDLE);
+		return cpuid_set_error(ERR_HANDLE);
 	DeviceIoControl(driver->hhDriver, IOCTL_PROCVIEW_RDMSR, &msr_index, sizeof(int), &msrdata, sizeof(__int64), &dwBytesReturned, &driver->ovl);
 	GetOverlappedResult(driver->hhDriver, &driver->ovl, &dwBytesReturned, TRUE);
 	*result = msrdata;
@@ -484,40 +484,40 @@ int cpu_msr_driver_close(struct msr_driver_t* drv)
 struct msr_driver_t { int dummy; };
 struct msr_driver_t* cpu_msr_driver_open(void)
 {
-	set_error(ERR_NOT_IMP);
+	cpuid_set_error(ERR_NOT_IMP);
 	return NULL;
 }
 
 struct msr_driver_t* cpu_msr_driver_open_core(unsigned core_num)
 {
-	set_error(ERR_NOT_IMP);
+	cpuid_set_error(ERR_NOT_IMP);
 	return NULL;
 }
 
 int cpu_rdmsr(struct msr_driver_t* driver, uint32_t msr_index, uint64_t* result)
 {
-	return set_error(ERR_NOT_IMP);
+	return cpuid_set_error(ERR_NOT_IMP);
 }
 
 int cpu_msr_driver_close(struct msr_driver_t* driver)
 {
-	return set_error(ERR_NOT_IMP);
+	return cpuid_set_error(ERR_NOT_IMP);
 }
 
 int cpu_rdmsr_range(struct msr_driver_t* handle, uint32_t msr_index, uint8_t highbit,
                     uint8_t lowbit, uint64_t* result)
 {
-	return set_error(ERR_NOT_IMP);
+	return cpuid_set_error(ERR_NOT_IMP);
 }
 
 int cpu_msrinfo(struct msr_driver_t* driver, cpu_msrinfo_request_t which)
 {
-	return set_error(ERR_NOT_IMP);
+	return cpuid_set_error(ERR_NOT_IMP);
 }
 
 int msr_serialize_raw_data(struct msr_driver_t* handle, const char* filename)
 {
-	return set_error(ERR_NOT_IMP);
+	return cpuid_set_error(ERR_NOT_IMP);
 }
 
 #endif /* Unsupported OS */
@@ -547,7 +547,21 @@ int msr_serialize_raw_data(struct msr_driver_t* handle, const char* filename)
 
   AMD Processor Programming Reference (PPR)
   * AMD Family 17h Processors
-  https://support.amd.com/TechDocs/54945_PPR_Family_17h_Models_00h-0Fh.pdf
+  Models 00h-0Fh: https://www.amd.com/system/files/TechDocs/54945-ppr-family-17h-models-00h-0fh-processors.zip
+  Models 01h, 08h, Revision B2: https://www.amd.com/system/files/TechDocs/54945_3.03_ppr_ZP_B2_pub.zip
+  Model 71h, Revision B0: https://www.amd.com/system/files/TechDocs/56176_ppr_Family_17h_Model_71h_B0_pub_Rev_3.06.zip
+  Model 60h, Revision A1: https://www.amd.com/system/files/TechDocs/55922-A1-PUB.zip
+  Model 18h, Revision B1: https://www.amd.com/system/files/TechDocs/55570-B1-PUB.zip
+  Model 20h, Revision A1: https://www.amd.com/system/files/TechDocs/55772-A1-PUB.zip
+  Model 31h, Revision B0 Processors https://www.amd.com/system/files/TechDocs/55803-ppr-family-17h-model-31h-b0-processors.pdf
+  Models A0h-AFh, Revision A0: https://www.amd.com/system/files/TechDocs/57243-A0-PUB.zip
+  * AMD Family 19h Processors
+  Model 01h, Revision B1: https://www.amd.com/system/files/TechDocs/55898_B1_pub_0.50.zip
+  Model 21h, Revision B0: https://www.amd.com/system/files/TechDocs/56214-B0-PUB.zip
+  Model 51h, Revision A1: https://www.amd.com/system/files/TechDocs/56569-A1-PUB.zip
+  Model 11h, Revision B1: https://www.amd.com/system/files/TechDocs/55901_0.25.zip
+  Model 61h, Revision B1: https://www.amd.com/system/files/TechDocs/56713-B1-PUB_3.04.zip
+  Model 70h, Revision A0: https://www.amd.com/system/files/TechDocs/57019-A0-PUB_3.00.zip
 
 - Intel MSRs:
   Intel® 64 and IA-32 Architectures Software Developer’s Manual
@@ -971,7 +985,7 @@ int cpu_rdmsr_range(struct msr_driver_t* handle, uint32_t msr_index, uint8_t hig
 	const uint8_t bits = highbit - lowbit + 1;
 
 	if(highbit > 63 || lowbit > highbit)
-		return set_error(ERR_INVRANGE);
+		return cpuid_set_error(ERR_INVRANGE);
 
 	err = cpu_rdmsr(handle, msr_index, result);
 
@@ -993,7 +1007,7 @@ int cpu_msrinfo(struct msr_driver_t* handle, cpu_msrinfo_request_t which)
 	static struct msr_info_t info;
 
 	if (handle == NULL) {
-		set_error(ERR_HANDLE);
+		cpuid_set_error(ERR_HANDLE);
 		return CPU_INVALID_VALUE;
 	}
 
@@ -1046,17 +1060,17 @@ int msr_serialize_raw_data(struct msr_driver_t* handle, const char* filename)
 
 	/* Check if MSR driver is initialized */
 	if (handle == NULL)
-		return set_error(ERR_HANDLE);
+		return cpuid_set_error(ERR_HANDLE);
 
 	/* Open file descriptor */
 	f = ((filename == NULL) || !strcmp(filename, "")) ? stdout : fopen(filename, "wt");
 	if (!f)
-		return set_error(ERR_OPEN);
+		return cpuid_set_error(ERR_OPEN);
 
 	/* Get cached decoded CPUID information */
 	id = get_cached_cpuid();
 	if (id->vendor == VENDOR_UNKNOWN)
-		return get_error();
+		return cpuid_get_error();
 
 	/* Get CPU stock speed */
 	if (cpu_clock == 0)
@@ -1068,7 +1082,7 @@ int msr_serialize_raw_data(struct msr_driver_t* handle, const char* filename)
 		case VENDOR_HYGON:
 		case VENDOR_AMD:   msr = amd_msr;   break;
 		case VENDOR_INTEL: msr = intel_msr; break;
-		default: return set_error(ERR_CPU_UNKN);
+		default: return cpuid_set_error(ERR_CPU_UNKN);
 	}
 
 	/* Print raw MSR values */
@@ -1083,7 +1097,7 @@ int msr_serialize_raw_data(struct msr_driver_t* handle, const char* filename)
 	/* Close file descriptor */
 	if (f != stdout)
 		fclose(f);
-	return set_error(ERR_OK);
+	return cpuid_set_error(ERR_OK);
 }
 
 #endif // RDMSR_UNSUPPORTED_OS

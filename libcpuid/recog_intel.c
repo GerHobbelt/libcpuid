@@ -66,6 +66,7 @@ enum _intel_model_t {
 	_11xxx, /* Core i[3579] 11xxx */
 	_12xxx, /* Core i[3579] 12xxx */
 	_13xxx, /* Core i[3579] 13xxx */
+	_14xxx, /* Core i[3579] 14xxx */
 	_x1xx,  /* Xeon Bronze/Silver/Gold/Platinum x1xx */
 	_x2xx,  /* Xeon Bronze/Silver/Gold/Platinum x2xx */
 	_x3xx,  /* Xeon Bronze/Silver/Gold/Platinum x3xx */
@@ -320,8 +321,11 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6, 15, -1, -1, 63,  -1,    -1,    -1, NC, 0             ,     0, "Haswell-E"                },
 
 	/* Silvermont CPUs (2013, 22nm, low-power) */
-	{  6,  7, -1, -1, 55,   4,    -1,    -1, NC, PENTIUM_      ,     0, "Bay Trail-M (Pentium)"    },
-	{  6,  7, -1, -1, 55,   2,    -1,    -1, NC, CELERON_      ,     0, "Bay Trail-M (Celeron)"    },
+	{  6,  7, -1, -1, 55,  -1,    -1,    -1, NC, PENTIUM_|_J_  ,     0, "Bay Trail-D (Pentium)"    },
+	{  6,  7, -1, -1, 55,  -1,    -1,    -1, NC, CELERON_|_J_  ,     0, "Bay Trail-D (Celeron)"    },
+	{  6,  7, -1, -1, 55,  -1,    -1,    -1, NC, PENTIUM_|_N_  ,     0, "Bay Trail-M (Pentium)"    },
+	{  6,  7, -1, -1, 55,  -1,    -1,    -1, NC, CELERON_|_N_  ,     0, "Bay Trail-M (Celeron)"    },
+	{  6,  7, -1, -1, 55,  -1,    -1,    -1, NC, ATOM_         ,     0, "Bay Trail-T (Atom)"       },
 
 	/* Broadwell CPUs (5th gen, 14nm): */
 	{  6,  7, -1, -1, 71,   4,    -1,    -1, NC, CORE_|_I_|_7  ,     0, "Broadwell (Core i7)"      },
@@ -513,6 +517,14 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_9|_H   , _13xxx, "Raptor Lake-H (Core i9)"  },
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_7|_H   , _13xxx, "Raptor Lake-H (Core i7)"  },
 	{  6, 10, -1, -1, 186, -1,    -1,    -1, NC, CORE_|_I_|_5|_H   , _13xxx, "Raptor Lake-H (Core i5)"  },
+	/* Raptor Lake Refresh CPUs (2023, 14th Core i gen, Intel 7) => https://en.wikipedia.org/wiki/Raptor_Lake#List_of_14th_generation_Raptor_Lake_processors */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_9      , _14xxx, "Raptor Lake-S (Core i9)"  },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7      , _14xxx, "Raptor Lake-S (Core i7)"  },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5      , _14xxx, "Raptor Lake-S (Core i5)"  },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_3      , _14xxx, "Raptor Lake-S (Core i3)"  },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_9|_H|_X, _14xxx, "Raptor Lake-HX (Core i9)" },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_X, _14xxx, "Raptor Lake-HX (Core i7)" },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_X, _14xxx, "Raptor Lake-HX (Core i5)" },
 
 	/* Sapphire Rapids CPUs (2023, 4th Xeon Scalable gen, Intel 7) => https://en.wikichip.org/wiki/intel/microarchitectures/sapphire_rapids */
 	{  6, 15, -1, -1, 143, -1,    -1,    -1, NC, XEON_|_W_|_9     , _x4xx, "Sapphire Rapids-WS (Xeon w9)"       },
@@ -804,6 +816,15 @@ static intel_code_and_bits_t get_brand_code_and_bits(struct cpu_id_t* data)
 			case 'W': bits |= _W_; break;
 		}
 	}
+
+	if (((bits & PENTIUM_) || (bits & CELERON_)) && ((i = match_pattern(bs, "[JN]")) != 0)) {
+		i--;
+		switch (bs[i]) {
+			case 'J': bits |= _J_; break;
+			case 'N': bits |= _N_; break;
+		}
+	}
+
 	for (i = 0; i < COUNT_OF(matchtable); i++)
 		if (match_pattern(bs, matchtable[i].search)) {
 			code = matchtable[i].c;
@@ -893,6 +914,7 @@ static intel_model_t get_model_code(struct cpu_id_t* data)
 		if ((bs[i] == '1') && (bs[i+1] == '1')) return _11xxx;
 		if ((bs[i] == '1') && (bs[i+1] == '2')) return _12xxx;
 		if ((bs[i] == '1') && (bs[i+1] == '3')) return _13xxx;
+		if ((bs[i] == '1') && (bs[i+1] == '4')) return _14xxx;
 		return UNKNOWN;
 	}
 	else if ((i = match_pattern(bs, "Xeon(R) [WBSGP]")) != 0) {

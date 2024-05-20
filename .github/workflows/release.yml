@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Get Git tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -24,7 +24,7 @@ jobs:
         make dist
 
     - name: Download macOS artifacts
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: unix.yml
@@ -33,7 +33,7 @@ jobs:
         path: macos
 
     - name: Download Windows (32-bit) artifacts
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: windows.yml
@@ -42,7 +42,7 @@ jobs:
         path: win32
 
     - name: Download Windows (64-bit) artifacts
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: windows.yml
@@ -70,7 +70,7 @@ jobs:
 
           As a convenience, the following binaries are provided:
           - A source tarball;
-          - Build for 64-bit macOS (built under [macOS 12.X](https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md));
-          - Build for 32-bit Windows, using MSVC XX.XX, in Debug, Release and Release DLL configurations (built under [Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md));
-          - Build for 64-bit Windows, using MSVC XX.XX, in Debug, Release and Release DLL configurations (built under [Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)).
+          - Build for 64-bit macOS (built under [macOS 14.X](https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md));
+          - Build for 32-bit Windows, using MSVC XX.XX, in Debug, Release and Release DLL configurations (built under [Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md));
+          - Build for 64-bit Windows, using MSVC XX.XX, in Debug, Release and Release DLL configurations (built under [Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)).
         artifacts: "libcpuid-${{ env.VERSION }}.tar.gz,libcpuid-${{ env.VERSION }}-macos.zip,libcpuid-${{ env.VERSION }}-win32.zip,libcpuid-${{ env.VERSION }}-win64.zip"

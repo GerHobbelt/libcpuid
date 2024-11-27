@@ -6,17 +6,22 @@ set(LIBCPUID_AGE 0)
 set(LIBCPUID_REVISION 5)
 project(
   cpuid
-  LANGUAGES C CXX ASM_MASM
+  LANGUAGES C ASM_MASM
   VERSION ${VERSION})
+
+# CMake modules
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if(MSVC)
   set(LIBCPUID_SHARED OFF)
 else()
   set(LIBCPUID_SHARED ON)
 endif()
-option(BUILD_SHARED_LIBS "Build shared lib" ${LIBCPUID_SHARED})
 
-option(LIBCPUID_TESTS "Enable building tests" OFF)
+# Options
+option(BUILD_SHARED_LIBS "Build building shared libraries" ${LIBCPUID_SHARED})
+option(LIBCPUID_BUILD_DRIVERS "Enable building kernel drivers" ON)
+option(LIBCPUID_ENABLE_TESTS "Enable tests targets" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 99)
@@ -47,8 +52,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
 endif()
 
 # Global variables
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-
 if(UNIX)
   include(GNUInstallDirs)
   set(prefix "${CMAKE_INSTALL_PREFIX}")
@@ -64,6 +67,9 @@ endif(UNIX)
 # Include subdirectories
 add_subdirectory(libcpuid)
 add_subdirectory(cpuid_tool)
-if(LIBCPUID_TESTS)
+if(LIBCPUID_BUILD_DRIVERS)
+  add_subdirectory(drivers)
+endif(LIBCPUID_BUILD_DRIVERS)
+if(LIBCPUID_ENABLE_TESTS)
   add_subdirectory(tests)
-endif()
+endif(LIBCPUID_ENABLE_TESTS)

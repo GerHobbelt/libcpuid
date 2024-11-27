@@ -7,18 +7,15 @@
 #include <string>
 using namespace std;
 
-static const char* drivers_root = "..\\contrib\\MSR Driver\\";
-static const char* sourcefile = "msrdriver.c";
-
 static char* images[2];
 static int sizes[2];
 static const char* filenames[] = { "TmpRdr.sys", "TmpRdr64.sys" };
 static vector<string> source;
 
-static bool read_image(const char* filename, char*& image, int& isize)
+static bool read_image(const char* drivers_root, const char* filename, char*& image, int& isize)
 {
 	char fn[512];
-	sprintf(fn, "%s%s", drivers_root, filename);
+	sprintf(fn, "%s\\%s", drivers_root, filename);
 	FILE* f = fopen(fn, "rb");
 	if (!f) return false;
 	fseek(f, 0, SEEK_END);
@@ -62,10 +59,17 @@ static void print_image(FILE* f, const char* arch, const char* image, int size)
 #define main      cpuid_embed_drivers_main
 #endif
 
-int main(void)
+int main(int argc, const char** argv)
 {
+	if (argc < 3) {
+		printf("%s DRIVER_ROOT_FOLDER SOURCE_FILE\n", argv[0]);
+		return 1;
+	}
+	const char* drivers_root = argv[1];
+	const char* sourcefile = argv[2];
+
 	for (int i = 0; i < 2; i++)
-		if (!read_image(filenames[i], images[i], sizes[i])) {
+		if (!read_image(drivers_root, filenames[i], images[i], sizes[i])) {
 			printf("Cannot read image `%s' from `%s'!\n", filenames[i], drivers_root);
 			return -1;
 		}

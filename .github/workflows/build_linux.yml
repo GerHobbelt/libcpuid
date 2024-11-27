@@ -1,4 +1,4 @@
-name: Build (FreeBSD)
+name: Build (Linux)
 
 on:
   push:
@@ -9,26 +9,18 @@ on:
       - '*'
 
 jobs:
-  build_freebsd:
-    name: Build on ${{ matrix.box }}
-    runs-on: ubuntu-latest
+  build_linux:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        box:
-          - generic/freebsd13
-          - generic/freebsd14
+        os:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Provision VM
-      uses: hummeltech/freebsd-vagrant-action@v1.4
-      with:
-        box: ${{ matrix.box }}
-        save_box_to_cache: true
-
-    - name: Install packages
-      run: sudo pkg install --yes cmake python3
+    - uses: actions/checkout@v4
 
     - name: Generate build system
       run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="" -DLIBCPUID_ENABLE_TESTS=ON

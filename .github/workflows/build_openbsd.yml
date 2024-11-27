@@ -1,4 +1,4 @@
-name: Build (FreeBSD)
+name: Build (OpenBSD)
 
 on:
   push:
@@ -9,14 +9,13 @@ on:
       - '*'
 
 jobs:
-  build_freebsd:
+  build_openbsd:
     name: Build on ${{ matrix.box }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         box:
-          - generic/freebsd13
-          - generic/freebsd14
+          - generic/openbsd7
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -26,9 +25,17 @@ jobs:
       with:
         box: ${{ matrix.box }}
         save_box_to_cache: true
+        provision-commands: >-
+          pkg_add -I install bash rsync-3.2.7p1;
+          echo 'AcceptEnv *' >> /etc/ssh/sshd_config;
+          rcctl restart sshd;
+          mkdir -p ${{ github.workspace }};
+          chown vagrant:vagrant ${{ github.workspace }};
+          mkdir -p ${{ runner.temp }};
+          chown vagrant:vagrant ${{ runner.temp }};
 
     - name: Install packages
-      run: sudo pkg install --yes cmake python3
+      run: sudo pkg_add -I cmake python3
 
     - name: Generate build system
       run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="" -DLIBCPUID_ENABLE_TESTS=ON
@@ -37,9 +44,7 @@ jobs:
       run: cmake --build build
 
     - name: Run cpuid_tool
-      run: |
-        ./build/cpuid_tool/cpuid_tool --save=- --all
-        sudo ./build/cpuid_tool/cpuid_tool --rdmsr-raw --rdmsr
+      run: ./build/cpuid_tool/cpuid_tool --save=- --all
 
     - name: Run tests
       run: |

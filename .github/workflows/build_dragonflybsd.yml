@@ -1,4 +1,4 @@
-name: Build (FreeBSD)
+name: Build (DragonFly BSD)
 
 on:
   push:
@@ -9,14 +9,13 @@ on:
       - '*'
 
 jobs:
-  build_freebsd:
+  build_dragonflybsd:
     name: Build on ${{ matrix.box }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         box:
-          - generic/freebsd13
-          - generic/freebsd14
+          - generic/dragonflybsd6
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

@@ -29,6 +29,7 @@
 #include "libcpuid_internal.h"
 
 #define COUNT_OF(array) (sizeof(array) / sizeof(array[0]))
+#define UNUSED(x) (void)(x)
 
 struct feature_map_t {
 	unsigned bit;
@@ -132,5 +133,8 @@ void decode_deterministic_cache_info_x86(uint32_t cache_regs[][NUM_REGS],
                                          uint8_t subleaf_count,
                                          struct cpu_id_t* data,
                                          struct internal_id_info_t* internal);
+
+/* generic way to get microarchitecture levels for x86 CPUs */
+void decode_architecture_version_x86(struct cpu_id_t* data);
 
 #endif /* __LIBCPUID_UTIL_H__ */

@@ -5,13 +5,18 @@ import os, sys, re, random
 
 
 ### Constants:
-fields = [ "architecture", "purpose", "family", "model", "stepping", "extfamily",
-	   "extmodel", "cores", "logical",
+delimiter = "-" * 80
+fields_x86 = [ "architecture", "feature-level", "purpose", "family", "model", "stepping",
+	   "extfamily", "extmodel", "cores", "logical",
 	   "l1d-cache",     "l1i-cache",     "l2-cache",     "l3-cache",     "l4-cache",
 	   "l1d-assoc",     "l1i-assoc",     "l2-assoc",     "l3-assoc",     "l4-assoc",
 	   "l1d-cacheline", "l1i-cacheline", "l2-cacheline", "l3-cacheline", "l4-cacheline",
 	   "l1d-instances", "l1i-instances", "l2-instances", "l3-instances", "l4-instances",
 	   "sse-size", "codename", "flags" ]
+fields_arm = [ "architecture", "feature-level", "purpose",
+	   "implementer", "variant", "part-num", "revision",
+	   "cores", "logical",
+	   "codename", "flags" ]
 
 args = sys.argv
 fix = False
@@ -69,7 +74,6 @@ def fmt_error(err):
 def fixFile(filename, input_lines, output_lines):
 	f = open(filename, "wt")
 	f.writelines([s + "\n" for s in input_lines])
-	f.write("--------------------------------------------------------------------------------\n")
 	f.writelines([s + "\n" for s in output_lines])
 	f.close()
 
@@ -79,6 +83,13 @@ def do_test(inp, expected_out, binary, test_file_name, num_cpu_type):
 	f = open(fninp, "wt")
 	f.writelines([s + "\n" for s in inp])
 	f.close()
+	architecture = os.popen("%s --load=%s --architecture" % (binary, fninp)).read().splitlines()[-1]
+	if architecture == "x86":
+		fields = fields_x86
+	elif architecture == "ARM":
+		fields = fields_arm
+	else:
+		fields = []
 	cmd = "%s --load=%s --outfile=%s %s" % (binary, fninp, fnoutp, " ".join(["--" + s for s in fields]))
 	os.system(cmd)
 	os.unlink(fninp)
@@ -86,14 +97,18 @@ def do_test(inp, expected_out, binary, test_file_name, num_cpu_type):
 	try:
 		f = open(fnoutp, "rt")
 		for s in f.readlines():
-			if "-----" not in s:
+			if delimiter not in s:
 				real_out.append(s.strip())
 		f.close()
 		os.unlink(fnoutp)
 	except IOError:
 		return "Exception"
 	if len(real_out) != len(expected_out) or len(real_out) != len(fields) * num_cpu_type:
-		return "Unexpected number of records returned"
+		if fix:
+			fixFile(test_file_name, inp, real_out)
+			return "Number of records, fixed."
+		else:
+			return "Unexpected number of records returned\n - expected length %d\n - real length %d\n - %d fields" % (len(expected_out), len(real_out), len(fields) * num_cpu_type)
 	err_fields = []
 	for i in range(len(real_out)):
 		if real_out[i] != expected_out[i]:
@@ -108,7 +123,6 @@ def do_test(inp, expected_out, binary, test_file_name, num_cpu_type):
 			return "Mismatch in fields:\n%s" % "\n".join([fmt_error(err) for err in err_fields])
 
 errors = False
-delimiter = "-" * 80
 print("Testing...")
 for test_file_name in filelist:
 	num_cpu_type = 0

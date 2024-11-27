@@ -176,7 +176,7 @@ const struct match_entry_t cpudb_amd[] = {
 	{ 15, -1, -1, 15, 0x5f,   1,   256,    -1, NC, SEMPRON_            ,     0, "Sempron 64 (Manila/256K)"      },
 	{ 15, -1, -1, 15, 0x6b,   2,   256,    -1, NC, SEMPRON_            ,     0, "Sempron 64 Dual (Sherman/256K)"},
 	{ 15, -1, -1, 15, 0x6b,   2,   512,    -1, NC, SEMPRON_            ,     0, "Sempron 64 Dual (Sherman/512K)"},
-	{ 15, -1, -1, 15, 0x7c,   1,   512,    -1, NC, ATHLON_             ,     0, "Athlon 64 (Sherman/515K)"      },
+	{ 15, -1, -1, 15, 0x7c,   1,   512,    -1, NC, ATHLON_             ,     0, "Athlon 64 (Sherman/512K)"      },
 	{ 15, -1, -1, 15, 0x7f,   1,   256,    -1, NC, SEMPRON_            ,     0, "Sempron 64 (Sparta/256K)"      },
 	{ 15, -1, -1, 15, 0x7f,   1,   512,    -1, NC, SEMPRON_            ,     0, "Sempron 64 (Sparta/512K)"      },
 	{ 15, -1, -1, 15, 0x4c,   1,   256,    -1, NC, MOBILE_| SEMPRON_   ,     0, "Mobile Sempron 64 (Keene/256K)"},
@@ -350,13 +350,16 @@ const struct match_entry_t cpudb_amd[] = {
 	/* Zen 4 (2022) => https://en.wikichip.org/wiki/amd/microarchitectures/zen_4 */
 	{ 15, -1, -1, 25,   17,  -1,    -1,    -1, NC, EPYC_               ,     0, "EPYC (Genoa)"                  },
 	{ 15, -1, -1, 25,   24,  -1,    -1,    -1, NC, RYZEN_TR_           ,     0, "Threadripper (Storm Peak)"     },
+	/*  => Raphael (7000 series, Zen 4/RDNA2 based) */
 	{ 15, -1,  2, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_9           ,     0, "Ryzen 9 (Raphael)"             },
 	{ 15, -1,  2, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_7           ,     0, "Ryzen 7 (Raphael)"             },
 	{ 15, -1,  2, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_5           ,     0, "Ryzen 5 (Raphael)"             },
 	{ 15, -1,  2, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_3           ,     0, "Ryzen 3 (Raphael)"             },
+	/*  => Dragon Range (7045 series, Zen 4/RDNA2 based) */
 	{ 15, -1, -1, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_9|_H        ,     0, "Ryzen 9 (Dragon Range)"        },
 	{ 15, -1, -1, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_7|_H        ,     0, "Ryzen 7 (Dragon Range)"        },
 	{ 15, -1, -1, 25,   97,  -1,    -1,    -1, NC, RYZEN_|_5|_H        ,     0, "Ryzen 5 (Dragon Range)"        },
+	/*  => Phoenix (7040 series, Zen 4/RDNA3/XDNA based) */
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_9|_H        ,     0, "Ryzen 9 (Phoenix)"             },
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_7|_H        ,     0, "Ryzen 7 (Phoenix)"             },
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_7|_U        ,     0, "Ryzen 7 (Phoenix)"             },
@@ -364,6 +367,21 @@ const struct match_entry_t cpudb_amd[] = {
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_5|_U        ,     0, "Ryzen 5 (Phoenix)"             },
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_3|_U        ,     0, "Ryzen 3 (Phoenix)"             },
 	{ 15, -1, -1, 25,  116,  -1,    -1,    -1, NC, RYZEN_|_Z           ,     0, "Ryzen Z1 (Phoenix)"            },
+	/*  => Phoenix (8000 series, Zen 4 based) */
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_7|_F        ,     0, "Ryzen 7 (Phoenix)"             },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_5|_F        ,     0, "Ryzen 5 (Phoenix)"             },
+	/*  => Phoenix (8000 series with Radeon Graphics, Zen 4/RDNA3/XDNA based) */
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_9|_G        ,     0, "Ryzen 9 (Phoenix)"             },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_7|_G        ,     0, "Ryzen 7 (Phoenix)"             },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_5|_G        ,     0, "Ryzen 5 (Phoenix)"             },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_3|_G        ,     0, "Ryzen 3 (Phoenix)"             },
+	/*  => Hawk Point (8040 series, Zen 4/RDNA3/XDNA based) */
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_9|_H        ,     0, "Ryzen 9 (Hawk Point)"          },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_7|_H        ,     0, "Ryzen 7 (Hawk Point)"          },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_7|_U        ,     0, "Ryzen 7 (Hawk Point)"          },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_5|_H        ,     0, "Ryzen 5 (Hawk Point)"          },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_5|_U        ,     0, "Ryzen 5 (Hawk Point)"          },
+	{ 15, -1, -1, 25,  117,  -1,    -1,    -1, NC, RYZEN_|_3|_U        ,     0, "Ryzen 3 (Hawk Point)"          },
 	/* F   M   S  EF    EM  #cores  L2$   L3$  BC  ModelBits          ModelCode  Name                           */
 };
 
@@ -421,11 +439,11 @@ static void load_amd_features(struct cpu_raw_data_t* raw, struct cpu_id_t* data)
 		- bit 0: FP128 */
 		data->detection_hints[CPU_HINT_SSE_SIZE_AUTH] = 1;
 		if ((raw->ext_cpuid[0x1a][EAX] >> 2) & 1)
-			data->sse_size = 256;
+			data->x86.sse_size = 256;
 		else if ((raw->ext_cpuid[0x1a][EAX]) & 1)
-			data->sse_size = 128;
+			data->x86.sse_size = 128;
 		else
-			data->sse_size = 64;
+			data->x86.sse_size = 64;
 	}
 }
 
@@ -478,7 +496,7 @@ static void decode_amd_number_of_cores(struct cpu_raw_data_t* raw, struct cpu_id
 	}
 	if (data->flags[CPU_FEATURE_HT]) {
 		if (num_cores > 1) {
-			if ((data->ext_family >= 23) && (raw->ext_cpuid[0][EAX] >= 30))
+			if ((data->x86.ext_family >= 23) && (raw->ext_cpuid[0][EAX] >= 30))
 				/* Ryzen 3 has SMT flag, but in fact cores count is equal to threads count.
 				Ryzen 5/7 reports twice as many "real" cores (e.g. 16 cores instead of 8) because of SMT. */
 				/* On PPR 17h, page 82:
@@ -579,8 +597,14 @@ static struct amd_code_and_bits_t decode_amd_codename_part1(const char *bs)
 			case '9': bits |= _9; break;
 			case 'Z': bits |= _Z; break;
 		}
-		for(i = i + 7; i < n; i++) {
+		/* Stop the loop after a whitespace to avoid to read some words like "Graphics".
+		   Example: bs="AMD Ryzen 7 8845HS w/ Radeon 780M Graphics"
+		   => loop i from 12 to 17, i.e. "8845HS" in such example
+		 */
+		for(i = i + 8; (i < n) && (bs[i] != ' '); i++) {
 			switch (bs[i]) {
+				case 'F': bits |= _F; break;
+				case 'G': bits |= _G; break;
 				case 'H': bits |= _H; break;
 				case 'S': bits |= _S; break;
 				case 'U': bits |= _U; break;
@@ -652,6 +676,7 @@ int cpuid_identify_amd(struct cpu_raw_data_t* raw, struct cpu_id_t* data, struct
 		decode_amd_cache_info(raw, data);
 	decode_amd_number_of_cores(raw, data);
 	decode_amd_codename(data, internal);
+	decode_architecture_version_x86(data);
 	return 0;
 }
 

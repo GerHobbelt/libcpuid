@@ -1,4 +1,4 @@
-name: Build (OpenBSD)
+name: Build (NetBSD)
 
 on:
   push:
@@ -13,25 +13,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_openbsd:
+  build_netbsd:
     name: Build on ${{ matrix.box }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         box:
-          - generic/openbsd7
+          - generic/netbsd9
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Provision VM
-      uses: hummeltech/openbsd-vagrant-action@v2
+      uses: hummeltech/netbsd-vagrant-action@v2
       with:
         box: ${{ matrix.box }}
         save_box_to_cache: true
 
     - name: Install packages
-      run: sudo pkg_add -I cmake python3
+      run: sudo pkgin -y install clang cmake python311
       shell: /usr/local/bin/bash --noprofile --norc -euo pipefail {0}
 
     - name: Generate build system
@@ -43,7 +43,9 @@ jobs:
       shell: /usr/local/bin/bash --noprofile --norc -euo pipefail {0}
 
     - name: Run cpuid_tool
-      run: ./build/cpuid_tool/cpuid_tool --save=- --all
+      run: |
+        sudo /sbin/sysctl -w security.models.extensions.user_set_cpu_affinity=1
+        ./build/cpuid_tool/cpuid_tool --save=- --all
       shell: /usr/local/bin/bash --noprofile --norc -euo pipefail {0}
 
     - name: Run tests

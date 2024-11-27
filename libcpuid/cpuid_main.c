@@ -451,6 +451,7 @@ static bool restore_cpu_affinity(void)
 #ifndef SET_CPU_AFFINITY
 static bool set_cpu_affinity(logical_cpu_t logical_cpu)
 {
+	UNUSED(logical_cpu);
 	static int warning_printed = 0;
 	if (!warning_printed) {
 		warning_printed = 1;
@@ -1654,8 +1655,7 @@ static void update_cache_instances(struct internal_cache_instances_t* caches,
 
 int cpu_identify_all(struct cpu_raw_data_array_t* raw_array, struct system_id_t* system)
 {
-	int cur_error = cpuid_set_error(ERR_OK);
-	int ret_error = cpuid_set_error(ERR_OK);
+	int r = ERR_OK;
 	double smt_divisor;
 	bool is_smt_supported;
 	bool is_topology_supported = true;
@@ -1673,8 +1673,8 @@ int cpu_identify_all(struct cpu_raw_data_array_t* raw_array, struct system_id_t*
 	if (system == NULL)
 		return cpuid_set_error(ERR_HANDLE);
 	if (!raw_array) {
-		if ((ret_error = cpuid_get_all_raw_data(&my_raw_array)) < 0)
-			return cpuid_set_error(ret_error);
+		if ((r = cpuid_get_all_raw_data(&my_raw_array)) < 0)
+			return r;
 		raw_array = &my_raw_array;
 	}
 	system_id_t_constructor(system);
@@ -1704,10 +1704,9 @@ int cpu_identify_all(struct cpu_raw_data_array_t* raw_array, struct system_id_t*
 			cpu_type_index = system->num_cpu_types;
 			cpuid_grow_system_id(system, system->num_cpu_types + 1);
 			cpuid_grow_type_info(&type_info, type_info.num + 1);
-			cur_error = cpu_ident_internal(&raw_array->raw[logical_cpu], &system->cpu_types[cpu_type_index], &type_info.data[cpu_type_index].id_info);
+			if ((r = cpu_ident_internal(&raw_array->raw[logical_cpu], &system->cpu_types[cpu_type_index], &type_info.data[cpu_type_index].id_info)) != ERR_OK)
+				return r;
 			type_info.data[cpu_type_index].purpose = purpose;
-			if (ret_error == ERR_OK)
-				ret_error = cur_error;
 			if (is_topology_supported)
 				type_info.data[cpu_type_index].package_id = cur_package_id;
 			if (raw_array->with_affinity)
@@ -1760,19 +1759,19 @@ int cpu_identify_all(struct cpu_raw_data_array_t* raw_array, struct system_id_t*
 		system->l4_total_instances             = caches_all.instances[L4];
 	}
 
-	return ret_error;
+	return cpuid_set_error(ERR_OK);
 }
 
 int cpu_request_core_type(cpu_purpose_t purpose, struct cpu_raw_data_array_t* raw_array, struct cpu_id_t* data)
 {
-	int error;
+	int r;
 	logical_cpu_t logical_cpu = 0;
 	struct cpu_raw_data_array_t my_raw_array;
 	struct internal_id_info_t throwaway;
 
 	if (!raw_array) {
-		if ((error = cpuid_get_all_raw_data(&my_raw_array)) < 0)
-			return cpuid_set_error(error);
+		if ((r = cpuid_get_all_raw_data(&my_raw_array)) < 0)
+			return r;
 		raw_array = &my_raw_array;
 	}
 
@@ -1808,16 +1807,16 @@ const char* cpu_feature_level_str(cpu_feature_level_t level)
 {
 	const struct { cpu_feature_level_t level; const char* name; }
 	matchtable[] = {
-		{ FEATURE_LEVEL_UNKNOWN,       "unknown"   },
+		{ FEATURE_LEVEL_UNKNOWN,   "unknown"   },
 		/* x86 */
-		{ CPU_FEATURE_LEVEL_I386,      "i386"      },
-		{ CPU_FEATURE_LEVEL_I486,      "i486"      },
-		{ CPU_FEATURE_LEVEL_I586,      "i586"      },
-		{ CPU_FEATURE_LEVEL_I686,      "i686"      },
-		{ CPU_FEATURE_LEVEL_X86_64_V1, "x86-64-v1" },
-		{ CPU_FEATURE_LEVEL_X86_64_V2, "x86-64-v2" },
-		{ CPU_FEATURE_LEVEL_X86_64_V3, "x86-64-v3" },
-		{ CPU_FEATURE_LEVEL_X86_64_V4, "x86-64-v4" },
+		{ FEATURE_LEVEL_I386,      "i386"      },
+		{ FEATURE_LEVEL_I486,      "i486"      },
+		{ FEATURE_LEVEL_I586,      "i586"      },
+		{ FEATURE_LEVEL_I686,      "i686"      },
+		{ FEATURE_LEVEL_X86_64_V1, "x86-64-v1" },
+		{ FEATURE_LEVEL_X86_64_V2, "x86-64-v2" },
+		{ FEATURE_LEVEL_X86_64_V3, "x86-64-v3" },
+		{ FEATURE_LEVEL_X86_64_V4, "x86-64-v4" },
 		/* ARM */
 		{ FEATURE_LEVEL_ARM_V1,     "ARMv1"     },
 		{ FEATURE_LEVEL_ARM_V2,     "ARMv2"     },
@@ -1854,7 +1853,7 @@ const char* cpu_feature_level_str(cpu_feature_level_t level)
 		{ FEATURE_LEVEL_ARM_V9_4_A, "ARMv9.4-A" },
 	};
 	unsigned i, n = COUNT_OF(matchtable);
-	if (n != (NUM_CPU_FEATURE_LEVELS - FEATURE_LEVEL_ARM_V1) + (CPU_FEATURE_LEVEL_X86_64_V4 - CPU_FEATURE_LEVEL_I386) + 2) {
+	if (n != (NUM_FEATURE_LEVELS - FEATURE_LEVEL_ARM_V1) + (FEATURE_LEVEL_X86_64_V4 - FEATURE_LEVEL_I386) + 2) {
 		warnf("Warning: incomplete library, feature level matchtable size differs from the actual number of levels.\n");
 	}
 	for (i = 0; i < n; i++)

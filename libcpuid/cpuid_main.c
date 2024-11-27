@@ -458,7 +458,7 @@ static bool set_cpu_affinity(logical_cpu_t logical_cpu)
 #define SET_CPU_AFFINITY
 #endif /* defined sun || defined __sun */
 
-#if defined __FreeBSD__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__
+#if defined __FreeBSD__ || defined  __DragonFly__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
@@ -471,7 +471,7 @@ static int get_total_cpus(void)
 	return ncpus;
 }
 #define GET_TOTAL_CPUS_DEFINED
-#endif /* defined __FreeBSD__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__ */
+#endif /* defined __FreeBSD__ || defined  __DragonFly__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__ */
 
 #if defined __FreeBSD__
 #include <sys/param.h>
@@ -528,6 +528,8 @@ static bool set_cpu_affinity(logical_cpu_t logical_cpu)
 #endif /* defined __DragonFly__ */
 
 #if defined __NetBSD__
+#include <unistd.h>
+#include <sys/sysctl.h>
 #include <pthread.h>
 #include <sched.h>
 
@@ -555,9 +557,36 @@ static bool restore_cpu_affinity(void)
 
 static bool set_cpu_affinity(logical_cpu_t logical_cpu)
 {
-	cpuset_t *cpuset;
-	cpuset = cpuset_create();
-	cpuset_set((cpuid_t) logical_cpu, cpuset);
+	int result = -1;
+	size_t size = sizeof(result);
+
+	/* Note: pthread_setaffinity_np() always returns 0 even if the target logical CPU does not exist */
+	if (logical_cpu >= get_total_cpus())
+		return false;
+
+	/* Check if user is allowed to control CPU sets: https://man.netbsd.org/secmodel_extensions.9 */
+	if (getuid() != 0) {
+		if (sysctlbyname("security.models.extensions.user_set_cpu_affinity", &result, &size, NULL, 0)) {
+			warnf("failed to get sysctl value for security.models.extensions.user_set_cpu_affinity\n");
+			return false;
+		}
+		else if (result == 0) {
+			warnf("user is not allowed to control the CPU affinity: you may enable \"Non-superuser control of CPU sets\" by setting sysctl security.models.extensions.user_set_cpu_affinity=1\n");
+			return false;
+		}
+	}
+
+	cpuset_t *cpuset = cpuset_create();
+	if (cpuset == NULL) {
+		warnf("failed to create CPU set for logical CPU %u\n", logical_cpu);
+		return false;
+	}
+
+	if (cpuset_set((cpuid_t) logical_cpu, cpuset) < 0) {
+		warnf("failed to set CPU set for logical CPU %u\n", logical_cpu);
+		return false;
+	}
+
 	int ret = pthread_setaffinity_np(pthread_self(), cpuset_size(cpuset), cpuset);
 	cpuset_destroy(cpuset);
 	return ret == 0;
@@ -1289,7 +1318,7 @@ int cpuid_get_raw_data_core(struct cpu_raw_data_t* data, logical_cpu_t logical_c
 	if (logical_cpu != (logical_cpu_t) -1) {
 		debugf(2, "Getting raw dump for logical CPU %u\n", logical_cpu);
 		if (!set_cpu_affinity(logical_cpu))
-			return ERR_INVCNB;
+			return cpuid_set_error(ERR_INVCNB);
 		affinity_saved = save_cpu_affinity();
 	}
 
@@ -1416,8 +1445,7 @@ int cpuid_get_raw_data_core(struct cpu_raw_data_t* data, logical_cpu_t logical_c
 
 int cpuid_get_all_raw_data(struct cpu_raw_data_array_t* data)
 {
-	int cur_error = cpuid_set_error(ERR_OK);
-	int ret_error = cpuid_set_error(ERR_OK);
+	int r = ERR_OK;
 	logical_cpu_t logical_cpu = 0;
 	struct cpu_raw_data_t raw_tmp;
 
@@ -1427,17 +1455,17 @@ int cpuid_get_all_raw_data(struct cpu_raw_data_array_t* data)
 	cpu_raw_data_array_t_constructor(data, true);
 	do {
 		memset(&raw_tmp, 0, sizeof(struct cpu_raw_data_t));
-		cur_error = cpuid_get_raw_data_core(&raw_tmp, logical_cpu);
-		if (cur_error == ERR_INVCNB)
+		if ((r = cpuid_get_raw_data_core(&raw_tmp, logical_cpu)) != ERR_OK)
 			break;
 		cpuid_grow_raw_data_array(data, logical_cpu + 1);
 		memcpy(&data->raw[logical_cpu], &raw_tmp, sizeof(struct cpu_raw_data_t));
-		if (ret_error == ERR_OK)
-			ret_error = cur_error;
 		logical_cpu++;
-	} while (cur_error == ERR_OK);
+	} while (r == ERR_OK);
 
-	return ret_error;
+	/* On ERR_INVCNB, it means that logical_cpu value is out of bounds and we must break the loop, but it is a normal behavior. */
+	if (r == ERR_INVCNB)
+		r = ERR_OK;
+	return cpuid_set_error(r);
 }
 
 int cpuid_serialize_raw_data(struct cpu_raw_data_t* data, const char* filename)

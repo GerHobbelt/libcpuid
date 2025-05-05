@@ -537,9 +537,20 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7      , _14xxx, "Raptor Lake-S (Core i7)"  },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5      , _14xxx, "Raptor Lake-S (Core i5)"  },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_3      , _14xxx, "Raptor Lake-S (Core i3)"  },
+	{  6,  7, -1, -1, 183,  2,    -1,    -1, NC, 0                 ,      0, "Raptor Lake-S (Intel Processor )"}, /* Intel Processor 300 + Intel Processor 300T */
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_9|_H|_X, _14xxx, "Raptor Lake-HX (Core i9)" },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_7|_H|_X, _14xxx, "Raptor Lake-HX (Core i7)" },
 	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_I_|_5|_H|_X, _14xxx, "Raptor Lake-HX (Core i5)" },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, XEON_             ,      0, "Raptor Lake (Xeon-E)"     },
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_U       ,   _1xx, "Raptor Lake-U (Core 7)"  }, /* Core 7 150U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_U       ,   _1xx, "Raptor Lake-U (Core 5)"  }, /* Core 5 120U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_3|_U       ,   _1xx, "Raptor Lake-U (Core 3)"  }, /* Core 3 100U */
+	/* Raptor Lake Re-refresh CPUs (2025, Core Series 2 processors Intel 7) => https://en.wikipedia.org/wiki/Raptor_Lake#List_of_Core_Series_2_processors */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_U       ,   _2xx, "Raptor Lake-U (Core 7)"  }, /* Core 7 250U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_U       ,   _2xx, "Raptor Lake-U (Core 5)"  }, /* Core 5 220U */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_9|_H       ,   _2xx, "Raptor Lake-H (Core 9)"  }, /* Core 9 270H */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_7|_H       ,   _2xx, "Raptor Lake-H (Core 7)"  }, /* Core 7 240H + Core 7 250H */
+	{  6,  7, -1, -1, 183, -1,    -1,    -1, NC, CORE_|_5|_H       ,   _2xx, "Raptor Lake-H (Core 5)"  }, /* Core 5 210H + Core 5 220H */
 
 	/* Sapphire Rapids CPUs (2023, 4th Xeon Scalable gen, Intel 7) => https://en.wikichip.org/wiki/intel/microarchitectures/sapphire_rapids */
 	{  6, 15, -1, -1, 143, -1,    -1,    -1, NC, XEON_|_W_|_9     , _x4xx, "Sapphire Rapids-WS (Xeon w9)"       },
@@ -566,10 +577,14 @@ const struct match_entry_t cpudb_intel[] = {
 	{  6, 10, -1, -1, 170, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_U, _1xx, "Meteor Lake-U (Core Ultra 5)" },
 
 	/* Arrow Lake CPUs (2024, Core Ultra Series 2 processors, TSMC N3B) => https://en.wikichip.org/wiki/intel/microarchitectures/arrow_lake */
-	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_9|_S, _2xx, "Arrow Lake-S (Core Ultra 9)" },
-	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_S, _2xx, "Arrow Lake-S (Core Ultra 7)" },
-	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_S, _2xx, "Arrow Lake-S (Core Ultra 5)" },
-	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_3|_S, _2xx, "Arrow Lake-S (Core Ultra 3)" },
+	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_9,    _2xx, "Arrow Lake-S (Core Ultra 9)" },
+	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7,    _2xx, "Arrow Lake-S (Core Ultra 7)" },
+	{  6,  6, -1, -1, 198, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5,    _2xx, "Arrow Lake-S (Core Ultra 5)" },
+	{  6,  6, -1, -1, 181, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_U, _2xx, "Arrow Lake-U (Core Ultra 7)" }, /* Core Ultra 7 255U + Core Ultra 7 265U */
+	{  6,  6, -1, -1, 181, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_U, _2xx, "Arrow Lake-U (Core Ultra 5)" }, /* Core Ultra 5 225U + Core Ultra 7 235U */
+	{  6,  6, -1, -1, 197, -1,    -1,    -1, NC, CORE_|_ULTRA_|_9|_H, _2xx, "Arrow Lake-H (Core Ultra 9)" }, /* Core Ultra 9 285H */
+	{  6,  6, -1, -1, 197, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_H, _2xx, "Arrow Lake-H (Core Ultra 7)" }, /* Core Ultra 7 255H + Core Ultra 7 265H */
+	{  6,  6, -1, -1, 197, -1,    -1,    -1, NC, CORE_|_ULTRA_|_5|_H, _2xx, "Arrow Lake-H (Core Ultra 5)" }, /* Core Ultra 5 225H + Core Ultra 7 235H */
 	/* Lunar Lake CPUs (2024, Core Ultra Series 2 processors, TSMC N3B) => https://en.wikichip.org/wiki/intel/microarchitectures/lunar_lake */
 	{  6, 13, -1, -1, 189, -1,    -1,    -1, NC, CORE_|_ULTRA_|_9|_V, _1xx, "Lunar Lake-V (Core Ultra 9)" },
 	{  6, 13, -1, -1, 189, -1,    -1,    -1, NC, CORE_|_ULTRA_|_7|_V, _1xx, "Lunar Lake-V (Core Ultra 7)" },
@@ -768,8 +783,7 @@ static intel_code_and_bits_t get_brand_code_and_bits(struct cpu_id_t* data)
 	const size_t n = strlen(bs);
 	const struct { intel_code_t c; const char *search; } matchtable[] = {
 		{ PENTIUM_M, "Pentium(R) M" },
-		{ CORE_SOLO, "Pentium(R) Dual  CPU" },
-		{ CORE_SOLO, "Pentium(R) Dual-Core" },
+		{ CORE_SOLO, "Pentium(R) Dual" },
 		{ PENTIUM_D, "Pentium(R) D" },
 		{ CORE_SOLO, "Genuine Intel(R) CPU" },
 		{ CORE_SOLO, "Intel(R) Core(TM)" },
